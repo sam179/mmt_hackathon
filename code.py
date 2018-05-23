@@ -6,7 +6,6 @@ import pandas as pd
 
 training_data = pd.read_csv('train.csv')
 test_data = pd.read_csv('test.csv')
-
 #training_data[0, 3, 4, 5, 6, 8, 9, 11, 12] = training_data[0, 3, 4, 5, 6, 8, 9, 11, 12].fillna(training_data[0, 3, 4, 5, 6, 8, 9, 11, 12].value_counts.index.values[0])
 training_data['A'] = training_data['A'].fillna(training_data['A'].value_counts().index[0]) 
 training_data['D'] = training_data['D'].fillna(training_data['D'].value_counts().index[0])
@@ -17,10 +16,25 @@ training_data['I'] = training_data['I'].fillna(training_data['I'].value_counts()
 training_data['J'] = training_data['J'].fillna(training_data['J'].value_counts().index[0])
 training_data['L'] = training_data['L'].fillna(training_data['L'].value_counts().index[0])
 training_data['M'] = training_data['M'].fillna(training_data['M'].value_counts().index[0])
+test_data['A'] = test_data['A'].fillna(test_data['A'].value_counts().index[0])
+test_data['D'] = test_data['D'].fillna(test_data['D'].value_counts().index[0])
+test_data['E'] = test_data['E'].fillna(test_data['E'].value_counts().index[0])
+test_data['F'] = test_data['F'].fillna(test_data['F'].value_counts().index[0])
+test_data['G'] = test_data['G'].fillna(test_data['G'].value_counts().index[0])
+test_data['I'] = test_data['I'].fillna(test_data['I'].value_counts().index[0])
+test_data['J'] = test_data['J'].fillna(test_data['J'].value_counts().index[0])
+test_data['L'] = test_data['L'].fillna(test_data['L'].value_counts().index[0])
+test_data['M'] = test_data['M'].fillna(test_data['M'].value_counts().index[0])
 X = training_data.iloc[:, 1:16].values
+print(X.shape)
+X_test = test_data.iloc[:, 1:].values
+X = np.concatenate((X, X_test))
+print(X_test.shape)
 y = training_data.iloc[:, 16].values
 X_num = X[:, [1, 2, 7, 10, 13, 14]]
-#print (X[35])
+print(X.shape)
+print (X[551, 0])
+print (X[552, 0])
 
 #np.set_printoptions(precision=3, suppress=True)
 #for i in range(0, X_num.shape[1]-1):
@@ -33,13 +47,11 @@ imputer = Imputer(missing_values = 'NaN', strategy = 'mean', axis = 0)
 imputer = imputer.fit(X_num)
 X[:, [1, 2, 7, 10, 13, 14]] = imputer.transform(X_num)
 
-print (X[56])
 
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
 X[:, [1, 2, 7, 10, 13, 14]] = sc.fit_transform(X[:, [1, 2, 7, 10, 13, 14]])
 
-print (X[56])
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 label_encoders = [LabelEncoder() for i in range(9)]
 X[:, 0] = label_encoders[0].fit_transform(X[:, 0])
@@ -55,3 +67,22 @@ onehotencoder = OneHotEncoder(categorical_features = [0, 3, 4, 5, 6, 8, 9, 11, 1
 X = onehotencoder.fit_transform(X).toarray()
 
 print (X.shape)
+X_train = X[:552, :]
+print (X_train.shape)
+X_test = X[552:, :]
+print (X_test.shape)
+from xgboost import XGBClassifier
+classifier = XGBClassifier()
+classifier.fit(X_train, y)
+
+y_pred = classifier.predict(X_test)
+
+print (y_pred)
+
+file = open("submission.csv","w")
+file.write("id,P\n")
+for i in range(0,y_pred.size):
+        file.write(str(i+553))
+        file.write(',')
+        file.write(str(y_pred[i])+'\n')
+
