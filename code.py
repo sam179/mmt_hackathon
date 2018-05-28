@@ -66,17 +66,32 @@ print (X_train.shape)
 X_test = X[552:, :]
 print (X_test.shape)
 
+
+
 from xgboost import XGBClassifier
-classifier = XGBClassifier(max_depth=4, seed = -2000)
+classifier = XGBClassifier(max_depth=3, min_child_weight=5, gamma = 0.0, subsample=0.8, colsample_bytree=0.6, reg_alpha=0.005, n_estimators=256, seed = 27)
 classifier.fit(X_train, y)
 
 y_pred = classifier.predict(X_test)
 
 from sklearn.model_selection import cross_val_score
-accuracies = cross_val_score(estimator = classifier, X = X_train, y = y, cv = 10)
+accuracies = cross_val_score(estimator = classifier, X = X_train, y = y, cv = 20)
 print (accuracies.mean())
-
+print (accuracies.std())
 print (y_pred)
+
+from sklearn.model_selection import GridSearchCV
+
+param_test6 = {
+ 'reg_lambda':[1e-2,0,0.0985, 0.09851, 0.099]
+}
+gsearch1 = GridSearchCV(estimator = XGBClassifier(reg_alpha = 0.005, max_depth=3,
+ min_child_weight=5, gamma=0.0, subsample=0.8, colsample_bytree=0.6,
+ objective= 'binary:logistic', scale_pos_weight=1,seed=27), 
+ param_grid = param_test6, scoring='roc_auc',n_jobs=-1,iid=False, cv=5)
+gsearch1 = gsearch1.fit(X_train, y)
+best_val = gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
+print (best_val)
 
 file = open("submission.csv","w")
 file.write("id,P\n")
