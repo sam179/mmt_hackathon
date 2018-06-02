@@ -1,5 +1,7 @@
 # make_my_trip_hackathon
 
+This solution obtained a prediction accuracy of 89.86%. 
+
 ## Problem
 
 Binary Classification of the given dataset. 
